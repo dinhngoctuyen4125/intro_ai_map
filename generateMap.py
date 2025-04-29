@@ -23,9 +23,9 @@ with open('numerical-data.txt', 'w', encoding='utf-8') as file:
             # print(type(pixel))
 
             if (pixel == (255, 255, 255)):
-                file.write('1 ')
+                file.write('1 ') # đi được
             else:
-                file.write('0 ')
+                file.write('0 ') # không đi được
 
             # pixel trả về là một tuple (R, G, B)
             # print(f"Pixel tại ({x},{y}): {pixel}")
