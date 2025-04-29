@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 from PIL import Image
-import matplotlib.patches as patches
 
+# Mở ảnh bản đồ
 cur_img = Image.open('./assets/imgs/cur-map.png')
 
-# fig: vùng hiển thị trong matplot
-# ax: vùng vẽ
 fig, ax = plt.subplots()
 ax.imshow(cur_img)
 
@@ -29,6 +27,6 @@ def onclick(event):
 # Gắn sự kiện nhấp chuột vào hình ảnh
 fig.canvas.mpl_connect('button_press_event', onclick)
 
-
-plt.title("Phường Láng Thượng, quận Đống Đa, thành phố Hà Nội")
+# Hiển thị bản đồ
+plt.axis('off')
 plt.show()
