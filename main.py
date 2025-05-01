@@ -3,10 +3,14 @@ import matplotlib.pyplot as plt
 import contextily as ctx
 from shapely.geometry import Point
 
-
 # Tải graph từ khu vực
 place_name = 'Phường Láng Thượng, Đống Đa, Hà Nội'
-G = ox.graph_from_place(place_name, network_type="all")
+
+try:
+    G = ox.load_graphml("lang_thuong.graphml")
+except:
+    G = ox.graph_from_place(place_name, network_type="all")
+    ox.save_graphml(G, filepath="lang_thuong.graphml")
 
 # Chuyển sang GeoDataFrame
 gdf_edges = ox.graph_to_gdfs(G, nodes=False)
@@ -31,7 +35,6 @@ def on_click(event):
     lon, lat = point_geo.xy[0][0], point_geo.xy[1][0]
     print(f"[CONVERTED] lon={lon:.6f}, lat={lat:.6f}")
     ax.plot(lon, lat, 'bo', markersize=5)
-
 
     # Tìm node gần nhất trong graph
     node_id = ox.distance.nearest_nodes(G, X=lon, Y=lat)
