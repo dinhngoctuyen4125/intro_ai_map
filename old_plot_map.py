@@ -112,6 +112,7 @@ def on_click(event):
     # Vẽ điểm đỏ
     point = ax.plot(x, y, 'ro')[0]
     plotted_objects.append(point)
+    fig.canvas.draw()
 
     if len(clicked_points) == 2:
         # Tìm node gần nhất
