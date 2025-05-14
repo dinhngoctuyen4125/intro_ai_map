@@ -57,6 +57,8 @@ def on_click(event):
         node_start = ox.distance.nearest_nodes(G, x1, y1)
         node_end = ox.distance.nearest_nodes(G, x2, y2)
 
+        print (G.nodes[node_start]['x'], G.nodes[node_start]['y'])
+
         # Kiểm tra nếu không có đường đi
         try:
             path = nx.shortest_path(G, node_start, node_end, weight="length")
