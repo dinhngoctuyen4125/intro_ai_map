@@ -4,6 +4,8 @@ import contextily as ctx
 import networkx as nx
 from shapely.geometry import Point
 
+import heuristic
+
 # Tải graph từ khu vực
 place_name = 'Phường Láng Thượng, Đống Đa, Hà Nội'
 
@@ -25,6 +27,8 @@ ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs=gdf_edges.crs
 
 clicked_points = []
 plotted_objects = []
+
+# print(heuristic.a_star(G, 8273234099, 5485652770))
 
 def on_click(event):
     if event.inaxes != ax:
@@ -57,12 +61,19 @@ def on_click(event):
         node_start = ox.distance.nearest_nodes(G, x1, y1)
         node_end = ox.distance.nearest_nodes(G, x2, y2)
 
+        print(f"Điểm bắt đầu: {node_start}")
+        print(f"Điểm kết thúc: {node_end}")
+        
+
         # Kiểm tra nếu không có đường đi
         try:
-            path = nx.shortest_path(G, node_start, node_end, weight="length")
+            # path = nx.shortest_path(G, node_start, node_end, weight="length")
+            path = heuristic.a_star(G, node_start, node_end)
         except nx.NetworkXNoPath:
             print("Không có đường đi giữa hai điểm đã chọn.")
             return
+        
+        print(path)
 
         # Vẽ đường đi ngắn nhất
         x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
