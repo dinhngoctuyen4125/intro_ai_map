@@ -53,3 +53,51 @@ def a_star(G, node_start, node_end):
             f_score[neighbor] = g_score[neighbor] + heuristic(G, neighbor, node_end)
 
     return None  # Nếu không tìm thấy đường đi
+
+def dijkstra(G, node_start, node_end):
+    # Khởi tạo các cấu trúc dữ liệu
+    unvisited_nodes = list(G.nodes)
+    shortest_path = {}  # Để lưu đường đi ngắn nhất
+    shortest_path[node_start] = None
+    node_distances = {node: float('inf') for node in G.nodes}
+    node_distances[node_start] = 0
+
+    while unvisited_nodes:
+        # Chọn node chưa thăm có khoảng cách ngắn nhất
+        current_node = None
+        for node in unvisited_nodes:
+            if current_node is None:
+                current_node = node
+            elif node_distances[node] < node_distances[current_node]:
+                current_node = node
+
+        # Nếu khoảng cách đến current_node là vô cùng (không có đường đi đến node này), dừng thuật toán
+        if node_distances[current_node] == float('inf'):
+            break
+
+        # Lấy các neighbors của current_node
+        neighbors = G.neighbors(current_node)
+
+        for neighbor in neighbors:
+            # Tính khoảng cách từ current_node đến neighbor
+            edge_weight = G[current_node][neighbor].get('length', 1)  # Chiều dài của cạnh
+            alternative_route = node_distances[current_node] + edge_weight
+
+            # Nếu tìm được đường đi ngắn hơn, cập nhật giá trị
+            if alternative_route < node_distances[neighbor]:
+                node_distances[neighbor] = alternative_route
+                shortest_path[neighbor] = current_node
+
+        # Đánh dấu current_node là đã thăm xong
+        unvisited_nodes.remove(current_node)
+
+    # Tạo đường đi từ node_end đến node_start (ngược lại)
+    path = []
+    current_node = node_end
+    while current_node != node_start:
+        path.append(current_node)
+        current_node = shortest_path[current_node]
+    path.append(node_start)
+    path.reverse()  # Đảo ngược lại để có đường đi từ node_start đến node_end
+
+    return path

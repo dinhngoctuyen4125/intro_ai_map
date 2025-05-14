@@ -68,7 +68,10 @@ def on_click(event):
         # Kiểm tra nếu không có đường đi
         try:
             # path = nx.shortest_path(G, node_start, node_end, weight="length")
-            path = heuristic.a_star(G, node_start, node_end)
+            
+            path = heuristic.dijkstra(G, node_start, node_end)
+            # path = heuristic.a_star(G, node_start, node_end)
+
         except nx.NetworkXNoPath:
             print("Không có đường đi giữa hai điểm đã chọn.")
             return
