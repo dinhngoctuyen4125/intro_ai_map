@@ -68,7 +68,11 @@ def add_node_on_edge(G, u, v, data, geom, point):
 
     attrs = {k: v for k, v in data.items() if k not in ("geometry", "length")}
     G.add_edge(u, new_node_id, length=length1, geometry=LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (new_x, new_y)]), **attrs)
+    G.add_edge(new_node_id, u, length=length1, geometry=LineString([(new_x, new_y), (G.nodes[u]["x"], G.nodes[u]["y"])]), **attrs)
+
     G.add_edge(new_node_id, v, length=length2, geometry=LineString([(new_x, new_y), (G.nodes[v]["x"], G.nodes[v]["y"])]), **attrs)
+    G.add_edge(v, new_node_id, length=length2, geometry=LineString([(G.nodes[v]["x"], G.nodes[v]["y"]), (new_x, new_y)]), **attrs)
+
 
     # Xóa cạnh cũ
     if G.is_multigraph():
