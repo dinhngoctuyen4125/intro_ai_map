@@ -13,6 +13,18 @@ def find_nearest_edge(G, point):
             nearest = (u, v, data, geom)
     return nearest
 
+def delete_edges(G, u, v, data):
+    if G.has_edge(u, v):
+        for key in list(G[u][v].keys()):
+            if data == G[u][v][key]:
+                G.remove_edge(u, v, key)
+                break
+    if G.has_edge(v, u):
+        for key in list(G[v][u].keys()):
+            if data == G[v][u][key]:
+                G.remove_edge(v, u, key)
+                break
+
 # Nếu nearest không phải đầu mút 2 đoạn thẳng nào cả -> tạo node & edge mới
 def add_node_on_edge(G, u, v, data, geom, point):
     # Tính vị trí gần nhất trên cạnh
@@ -38,16 +50,6 @@ def add_node_on_edge(G, u, v, data, geom, point):
         G.add_edge(new_node_id, u, length=length1, geometry=LineString([(new_x, new_y), (G.nodes[u]["x"], G.nodes[u]["y"])]), **attrs)
         G.add_edge(v, new_node_id, length=length2, geometry=LineString([(G.nodes[v]["x"], G.nodes[v]["y"]), (new_x, new_y)]), **attrs)
 
-
-    if G.has_edge(u, v):
-        for key in list(G[u][v].keys()):
-            if data == G[u][v][key]:
-                G.remove_edge(u, v, key)
-                break
-    if G.has_edge(v, u):
-        for key in list(G[v][u].keys()):
-            if data == G[v][u][key]:
-                G.remove_edge(v, u, key)
-                break
+    delete_edges(G, u, v, data)
 
     return new_node_id
