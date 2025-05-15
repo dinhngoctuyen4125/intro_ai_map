@@ -48,7 +48,7 @@ def a_star(G, node_start, node_end):
         closed_list.add(current)
 
         # Duyệt qua từng cạnh xuất phát từ current
-        for _, neighbor, data in G.edges(current, data=True):
+        for _, neighbor, data in G.out_edges(current, data=True):
             if neighbor in closed_list:
                 continue
             weight = data.get('length', 1)
@@ -77,7 +77,7 @@ def dijkstra(G, node_start, node_end):
             break
         visited.add(current)
 
-        for _, neighbor, data in G.edges(current, data=True):
+        for _, neighbor, data in G.out_edges(current, data=True):
             if neighbor in visited:
                 continue
             weight = data.get('length', 1)
