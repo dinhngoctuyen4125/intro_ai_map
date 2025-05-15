@@ -75,13 +75,13 @@ def add_node_on_edge(G, u, v, data, geom, point):
 
 
     # Xóa cạnh cũ
-    if G.is_multigraph():
-        keys = list(G[u][v].keys())
-        for k in keys:
-            if G[u][v][k] == data:
-                G.remove_edge(u, v, key=k)
-    else:
-        G.remove_edge(u, v)
+    if G.has_edge(u, v):
+        for key in list(G[u][v].keys()):
+            G.remove_edge(u, v, key)
+
+    if G.has_edge(v, u):
+        for key in list(G[v][u].keys()):
+            G.remove_edge(v, u, key)
 
     return new_node_id
 
