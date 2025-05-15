@@ -4,7 +4,11 @@ import contextily as ctx
 import networkx as nx
 from shapely.geometry import Point
 
-import heuristic, node_handling
+import node_handling, path_handling, a_star, dijkstra
+# node_handling: xử lí thêm node, thêm cạnh, xóa cạnh mới
+# path_handling: tính toán độ dài đường đi tìm được
+# a_star: thuật toán a*
+# dijkstra: thuật toán dijkstra
 
 print("Choose algorithm for finding shortest path: [1]: A-star, [2]: Dijkstra")
 algo = int(input())
@@ -87,12 +91,11 @@ def on_click(event):
         
         try:
             if (algo == 1):
-                path = heuristic.a_star(G, node_start, node_end)
-            
+                path = a_star.heuristic(G, node_start, node_end)
             else:
-                path = heuristic.dijkstra(G, node_start, node_end)
+                path = dijkstra.heuristic(G, node_start, node_end)
             
-            print(f'Độ dài đường: {heuristic.do_dai_duong_di(G, path):.2f} km')
+            print(f'Độ dài đường: {path_handling.do_dai_duong_di(G, path):.2f} km')
 
         except nx.NetworkXNoPath:
             print("Không có đường đi giữa hai điểm đã chọn.")
