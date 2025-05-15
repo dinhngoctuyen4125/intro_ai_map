@@ -19,16 +19,14 @@ except:
 gdf_edges = ox.graph_to_gdfs(G, nodes=False)
 
 # Vẽ bằng matplotlib
-fig, ax = plt.subplots(figsize=(13, 13))
-gdf_edges.plot(ax=ax, linewidth=1, edgecolor='blue')
+fig, ax = plt.subplots(figsize=(10, 10))
+gdf_edges.plot(ax=ax, linewidth=0, edgecolor='blue')
 
 # Thêm lớp nền bản đồ thật (tile màu)
 ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs=gdf_edges.crs.to_string())
 
 clicked_points = []
 plotted_objects = []
-
-# print(heuristic.a_star(G, 8273234099, 5485652770))
 
 def on_click(event):
     if event.inaxes != ax:
@@ -61,8 +59,8 @@ def on_click(event):
         node_start = ox.distance.nearest_nodes(G, x1, y1)
         node_end = ox.distance.nearest_nodes(G, x2, y2)
 
-        print(f"Điểm bắt đầu: {node_start}")
-        print(f"Điểm kết thúc: {node_end}")
+        print(f"Tọa độ bắt đầu: {G.nodes[node_start]['x'], G.nodes[node_start]['y']}")
+        print(f"Tọa độ kết thúc: {G.nodes[node_end]['x'], G.nodes[node_end]['y']}")
         
 
         # Kiểm tra nếu không có đường đi
@@ -76,13 +74,15 @@ def on_click(event):
             print("Không có đường đi giữa hai điểm đã chọn.")
             return
         
-        print(path)
+        print(f'Dãy các điểm đi qua: {path}')
 
         # Vẽ đường đi ngắn nhất
         x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
-        line = ax.plot(x_route, y_route, color='red', linewidth=3, alpha=0.7)[0]
+        line = ax.plot(x_route, y_route, color='red', linewidth=2, alpha=0.7)[0]
         plotted_objects.append(line)
         fig.canvas.draw()
+        
+        print('-----------')
 
 
 cid = fig.canvas.mpl_connect('button_press_event', on_click)
