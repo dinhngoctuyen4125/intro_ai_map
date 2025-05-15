@@ -9,6 +9,13 @@ import heuristic
 print("Choose algorithm for finding shortest path: [1]: A-star, [2]: Dijkstra")
 algo = int(input())
 
+if algo == 1:
+    print('Thuật toán tìm đường đi ngắn nhất A*')
+else:
+    print('Thuật toán tìm đường đi ngắn nhất Dijkstra')
+
+print('--------------------------------------------')
+
 # Tải graph từ khu vực
 place_name = 'Phường Láng Thượng, Đống Đa, Hà Nội'
 
@@ -71,16 +78,14 @@ def on_click(event):
         node_start = coords[0]
         node_end = coords[1]
 
-        print(f"Tọa độ bắt đầu: {G.nodes[node_start]['x'], G.nodes[node_start]['y']}")
-        print(f"Tọa độ kết thúc: {G.nodes[node_end]['x'], G.nodes[node_end]['y']}")
+        print(f"Tọa độ bắt đầu: ({G.nodes[node_start]['x']:.4f}, {G.nodes[node_start]['y']:.4f})")
+        print(f"Tọa độ kết thúc: ({G.nodes[node_end]['x']:.4f}, {G.nodes[node_end]['y']:.4f})")
         
         try:
             if (algo == 1):
-                print('Thuật toán A*')
                 path = heuristic.a_star(G, node_start, node_end)
             
             else:
-                print('Thuật toán Dijkstra')
                 path = heuristic.dijkstra(G, node_start, node_end)
             
             print(f'Độ dài đường: {heuristic.do_dai_duong_di(G, path):.2f} km')
@@ -95,7 +100,7 @@ def on_click(event):
         plotted_objects.append(line)
         fig.canvas.draw()
         
-        print('-----------')
+        print('--------------------------------------------')
 
 
 cid = fig.canvas.mpl_connect('button_press_event', on_click)
