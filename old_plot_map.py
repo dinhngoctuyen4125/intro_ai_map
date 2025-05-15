@@ -6,6 +6,9 @@ from shapely.geometry import Point
 
 import heuristic
 
+print("Choose algorithm for finding shortest path: [1]: A-star, [2]: Dijkstra")
+algo = int(input())
+
 # Tải graph từ khu vực
 place_name = 'Phường Láng Thượng, Đống Đa, Hà Nội'
 
@@ -25,39 +28,48 @@ gdf_edges.plot(ax=ax, linewidth=0, edgecolor='blue')
 # Thêm lớp nền bản đồ thật (tile màu)
 ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs=gdf_edges.crs.to_string())
 
-clicked_points = []
-plotted_objects = []
+clicked_points = [] # Các điểm đã click trên màn hình
+plotted_objects = [] # Các đối tượng vẽ ra màn hình (điểm, đường thẳng,...)
+coords = []
+path = None
 
 def on_click(event):
+    # Nếu on_click không trong bản đồ thì bỏ qua
     if event.inaxes != ax:
         return
 
-    global clicked_points, plotted_objects
-
-    # Nếu đã click 2 điểm rồi → lần thứ 3 → reset
+    # Nếu click đến lần thứ 3 thì xóa đi
     if len(clicked_points) >= 2:
         # Xóa các đối tượng cũ (nút và đường)
         for obj in plotted_objects:
             obj.remove()
+        
+        coords.clear()
         plotted_objects.clear()
         clicked_points.clear()
         fig.canvas.draw()
         return
 
-    # Lưu điểm click
+    # Lưu lại các điểm click
     x, y = event.xdata, event.ydata
     clicked_points.append((x, y))
 
-    # Vẽ điểm đỏ
-    point = ax.plot(x, y, 'ro')[0]
+    # Tô đỏ điểm vừa click
+    point = ax.plot(x, y, 'bo')[0]
     plotted_objects.append(point)
+
+    nearest_node = ox.distance.nearest_nodes(G, x, y)
+    point = ax.plot(G.nodes[nearest_node]['x'], G.nodes[nearest_node]['y'], 'ro')[0]
+    plotted_objects.append(point)
+    coords.append(nearest_node)
+
     fig.canvas.draw()
 
+    # Click đủ 2 lần thì tìm đường đi, vẽ đường đi,... thôi
     if len(clicked_points) == 2:
-        # Tìm node gần nhất
-        (x1, y1), (x2, y2) = clicked_points
-        node_start = ox.distance.nearest_nodes(G, x1, y1)
-        node_end = ox.distance.nearest_nodes(G, x2, y2)
+
+        node_start = coords[0]
+        node_end = coords[1]
 
         print(f"Tọa độ bắt đầu: {G.nodes[node_start]['x'], G.nodes[node_start]['y']}")
         print(f"Tọa độ kết thúc: {G.nodes[node_end]['x'], G.nodes[node_end]['y']}")
@@ -67,14 +79,17 @@ def on_click(event):
         try:
             # path = nx.shortest_path(G, node_start, node_end, weight="length")
             
-            path = heuristic.dijkstra(G, node_start, node_end)
-            # path = heuristic.a_star(G, node_start, node_end)
+            if (algo == 1):
+                path = heuristic.a_star(G, node_start, node_end)
+            
+            else:
+                path = heuristic.dijkstra(G, node_start, node_end)
 
         except nx.NetworkXNoPath:
             print("Không có đường đi giữa hai điểm đã chọn.")
             return
         
-        print(f'Dãy các điểm đi qua: {path}')
+        # print(f'Dãy các điểm đi qua: {path}')
 
         # Vẽ đường đi ngắn nhất
         x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
