@@ -1,5 +1,13 @@
 from shapely.geometry import LineString
 
+deleted_edges = []
+added_edges = []
+
+def save_last_added_edge(G, u, v):
+    key = max(G[u][v].keys())
+    data = G[u][v][key].copy()
+    return (u, v, key, data)
+
 # Tìm điểm trên các đường đi mà gần điểm clicked vào nhất
 def find_nearest_edge(G, point):
     min_dist = float("inf")
@@ -17,11 +25,13 @@ def delete_edges(G, u, v, data):
     if G.has_edge(u, v):
         for key in list(G[u][v].keys()):
             if data == G[u][v][key]:
+                deleted_edges.append((u, v, key, data.copy()))
                 G.remove_edge(u, v, key)
                 break
     if G.has_edge(v, u):
         for key in list(G[v][u].keys()):
             if data == G[v][u][key]:
+                deleted_edges.append((v, u, key, data.copy()))
                 G.remove_edge(v, u, key)
                 break
 
@@ -42,13 +52,17 @@ def add_node_on_edge(G, u, v, data, geom, point):
     attrs = {k: v for k, v in data.items() if k not in ("geometry", "length")}
     
     G.add_edge(u, new_node_id, length=length1, geometry=LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (new_x, new_y)]), **attrs)
+    added_edges.append(save_last_added_edge(G, u, new_node_id))
     G.add_edge(new_node_id, v, length=length2, geometry=LineString([(new_x, new_y), (G.nodes[v]["x"], G.nodes[v]["y"])]), **attrs)
+    added_edges.append(save_last_added_edge(G, new_node_id, v))
 
 
     # Nếu đường không một chiều, thêm chiều ngược lại
     if not data.get('oneway', False):
         G.add_edge(new_node_id, u, length=length1, geometry=LineString([(new_x, new_y), (G.nodes[u]["x"], G.nodes[u]["y"])]), **attrs)
+        added_edges.append(save_last_added_edge(G, new_node_id, u))
         G.add_edge(v, new_node_id, length=length2, geometry=LineString([(G.nodes[v]["x"], G.nodes[v]["y"]), (new_x, new_y)]), **attrs)
+        added_edges.append(save_last_added_edge(G, v, new_node_id))
 
     delete_edges(G, u, v, data)
 

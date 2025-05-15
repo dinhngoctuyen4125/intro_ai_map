@@ -50,6 +50,17 @@ def on_click(event):
 
     # Nếu click đến lần thứ 3 thì xóa đi
     if len(clicked_points) >= 2:
+        for (u, v, key, data) in node_handling.deleted_edges:
+            G.add_edge(u, v, key=key, **data)
+        node_handling.deleted_edges.clear()
+        for (u, v, key, data) in node_handling.added_edges:
+            if data == G[u][v][key]:
+                G.remove_edge(u, v, key)
+        node_handling.added_edges.clear()
+
+
+
+
         # Xóa các đối tượng cũ (nút và đường)
         for obj in plotted_objects:
             obj.remove()
