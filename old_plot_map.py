@@ -74,22 +74,20 @@ def on_click(event):
         print(f"Tọa độ bắt đầu: {G.nodes[node_start]['x'], G.nodes[node_start]['y']}")
         print(f"Tọa độ kết thúc: {G.nodes[node_end]['x'], G.nodes[node_end]['y']}")
         
-
-        # Kiểm tra nếu không có đường đi
         try:
-            # path = nx.shortest_path(G, node_start, node_end, weight="length")
-            
             if (algo == 1):
+                print('Thuật toán A*')
                 path = heuristic.a_star(G, node_start, node_end)
             
             else:
+                print('Thuật toán Dijkstra')
                 path = heuristic.dijkstra(G, node_start, node_end)
+            
+            print(f'Độ dài đường: {heuristic.do_dai_duong_di(G, path):.2f} km')
 
         except nx.NetworkXNoPath:
             print("Không có đường đi giữa hai điểm đã chọn.")
             return
-        
-        # print(f'Dãy các điểm đi qua: {path}')
 
         # Vẽ đường đi ngắn nhất
         x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])

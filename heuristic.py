@@ -1,6 +1,24 @@
 import heapq
 import math
 
+def distance_on_earth(G, node1, node2): # khoảng cách thực tế giữa 2 vị trí dựa trên kinh độ vĩ độ
+    # (lon, lat): (kinh độ, vĩ độ)
+    lon1, lat1 = G.nodes[node1]['x'], G.nodes[node1]['y']
+    lon2, lat2 = G.nodes[node2]['x'], G.nodes[node2]['y']
+
+    avg_lat_rad = math.radians((lat1 + lat2) / 2)
+    x = (lon2 - lon1) * 111 * math.cos(avg_lat_rad)
+    y = (lat2 - lat1) * 111
+    d = math.sqrt(x**2 + y**2)
+    return d  # km
+
+def do_dai_duong_di(G, path):
+    cal = 0
+    for i in range(1, len(path)):
+        cal += distance_on_earth(G, path[i - 1], path[i])
+    
+    return cal
+
 def dist(G, node, node_end):
     x1, y1 = G.nodes[node]['x'], G.nodes[node]['y']
     x2, y2 = G.nodes[node_end]['x'], G.nodes[node_end]['y']
