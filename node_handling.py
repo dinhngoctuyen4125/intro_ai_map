@@ -1,4 +1,5 @@
 from shapely.geometry import LineString
+import copy
 
 deleted_edges = []
 added_edges = []
@@ -21,17 +22,39 @@ def find_nearest_edge(G, point):
             nearest = (u, v, data, geom)
     return nearest
 
+def reverse_edge_data(data):
+    # Tạo bản sao sâu để tránh thay đổi gốc
+    new_data = copy.deepcopy(data)
+
+    # Đảo ngược geometry nếu có
+    if "geometry" in new_data:
+        new_data["geometry"] = LineString(list(new_data["geometry"].coords)[::-1])
+
+    # Đảo ngược trường 'reversed' nếu có
+    if "reversed" in new_data:
+        if isinstance(new_data["reversed"], str):  # nếu là chuỗi "True"/"False"
+            new_data["reversed"] = "False" if new_data["reversed"] == "True" else "True"
+        elif isinstance(new_data["reversed"], bool):
+            new_data["reversed"] = not new_data["reversed"]
+
+    return new_data
+
 def delete_edges(G, u, v, data):
+    print (u, v, data)
     if G.has_edge(u, v):
         for key in list(G[u][v].keys()):
+            print(key)
             if data == G[u][v][key]:
                 deleted_edges.append((u, v, key, data.copy()))
                 G.remove_edge(u, v, key)
                 break
+
+    new_data = reverse_edge_data(data)
+    print (new_data)
     if G.has_edge(v, u):
         for key in list(G[v][u].keys()):
-            if data == G[v][u][key]:
-                deleted_edges.append((v, u, key, data.copy()))
+            if new_data == G[v][u][key]:
+                deleted_edges.append((v, u, key, new_data))
                 G.remove_edge(v, u, key)
                 break
 
