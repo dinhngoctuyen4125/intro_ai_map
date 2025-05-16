@@ -40,6 +40,7 @@ ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik, crs=gdf_edges.crs
 
 clicked_points = [] # Các điểm đã click trên màn hình
 plotted_objects = [] # Các đối tượng vẽ ra màn hình (điểm, đường thẳng,...)
+deleted_edges = []
 coords = [] # lưu 2 tọa độ là bắt đầu và kết thúc
 path = None # đường đi start -> end đi qua những đỉnh nào
 
@@ -47,78 +48,82 @@ def on_click(event):
     # Nếu on_click không trong bản đồ thì bỏ qua
     if event.inaxes != ax:
         return
-
-    # Nếu click đến lần thứ 3 thì xóa đi
-    if len(clicked_points) >= 2:
-        for (u, v, key, data) in node_handling.deleted_edges:
-            G.add_edge(u, v, key=key, **data)
-        node_handling.deleted_edges.clear()
-        for (u, v, key, data) in node_handling.added_edges:
-            if data == G[u][v][key]:
-                G.remove_edge(u, v, key)
-        node_handling.added_edges.clear()
-
-
-
-
-        # Xóa các đối tượng cũ (nút và đường)
-        for obj in plotted_objects:
-            obj.remove()
-        
-        coords.clear()
-        plotted_objects.clear()
-        clicked_points.clear()
-        fig.canvas.draw()
-        return
-
-    # Lưu lại các điểm click
     x, y = event.xdata, event.ydata
-    clicked_points.append((x, y))
-    
     click_point = Point(x, y)
-    u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
-    new_node = node_handling.add_node_on_edge(G, u, v, data, geom, click_point)
 
-    # tô xanh điểm click (bo -> blue)
-    point = ax.plot(x, y, 'bo')[0]
-    plotted_objects.append(point)
-    fig.canvas.draw()
-    
-    # tô đỏ điểm gần nhất vừa tìm (ro -> red)
-    point = ax.plot(G.nodes[new_node]['x'], G.nodes[new_node]['y'], 'ro')[0]
-    plotted_objects.append(point)
-    coords.append(new_node)
-    
-    fig.canvas.draw()
+    # Xử lí chuột phải
+    if event.button == 3:
+        u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
+        node_handling.delete_edges(G, u, v, data)
 
-    # Click đủ 2 lần thì tìm đường đi, vẽ đường đi,... thôi
-    if len(clicked_points) == 2:
+    elif event.button == 1:
+        # Nếu click đến lần thứ 3 thì xóa đi
+        if len(clicked_points) >= 2:
+            for (u, v, key, data) in node_handling.deleted_edges:
+                G.add_edge(u, v, key=key, **data)
+            node_handling.deleted_edges.clear()
+            for (u, v, key, data) in node_handling.added_edges:
+                if data == G[u][v][key]:
+                    G.remove_edge(u, v, key)
+            node_handling.added_edges.clear()
 
-        node_start = coords[0]
-        node_end = coords[1]
-
-        print(f"Tọa độ bắt đầu: ({G.nodes[node_start]['x']:.4f}, {G.nodes[node_start]['y']:.4f})")
-        print(f"Tọa độ kết thúc: ({G.nodes[node_end]['x']:.4f}, {G.nodes[node_end]['y']:.4f})")
-        
-        try:
-            if (algo == 1):
-                path = a_star.heuristic(G, node_start, node_end)
-            else:
-                path = dijkstra.heuristic(G, node_start, node_end)
+            # Xóa các đối tượng cũ (nút và đường)
+            for obj in plotted_objects:
+                obj.remove()
             
-            print(f'Độ dài đường: {path_handling.do_dai_duong_di(G, path):.2f} km')
-
-        except nx.NetworkXNoPath:
-            print("Không có đường đi giữa hai điểm đã chọn.")
+            coords.clear()
+            plotted_objects.clear()
+            clicked_points.clear()
+            deleted_edges.clear()
+            fig.canvas.draw()
             return
 
-        # Vẽ đường đi ngắn nhất (màu đỏ)
-        x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
-        line = ax.plot(x_route, y_route, color='red', linewidth=2, alpha=0.7)[0]
-        plotted_objects.append(line)
+        # Lưu lại các điểm click
+        clicked_points.append((x, y))
+        
+        u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
+        new_node = node_handling.add_node_on_edge(G, u, v, data, geom, click_point)
+
+        # tô xanh điểm click (bo -> blue)
+        point = ax.plot(x, y, 'bo')[0]
+        plotted_objects.append(point)
         fig.canvas.draw()
         
-        print('--------------------------------------------')
+        # tô đỏ điểm gần nhất vừa tìm (ro -> red)
+        point = ax.plot(G.nodes[new_node]['x'], G.nodes[new_node]['y'], 'ro')[0]
+        plotted_objects.append(point)
+        coords.append(new_node)
+        
+        fig.canvas.draw()
+
+        # Click đủ 2 lần thì tìm đường đi, vẽ đường đi,... thôi
+        if len(clicked_points) == 2:
+
+            node_start = coords[0]
+            node_end = coords[1]
+
+            print(f"Tọa độ bắt đầu: ({G.nodes[node_start]['x']:.4f}, {G.nodes[node_start]['y']:.4f})")
+            print(f"Tọa độ kết thúc: ({G.nodes[node_end]['x']:.4f}, {G.nodes[node_end]['y']:.4f})")
+            
+            try:
+                if (algo == 1):
+                    path = a_star.heuristic(G, node_start, node_end)
+                else:
+                    path = dijkstra.heuristic(G, node_start, node_end)
+                
+                print(f'Độ dài đường: {path_handling.do_dai_duong_di(G, path):.2f} km')
+                print('--------------------------------------------')
+
+            except nx.NetworkXNoPath:
+                print("Không có đường đi giữa hai điểm đã chọn.")
+                print('--------------------------------------------')
+                return
+
+            # Vẽ đường đi ngắn nhất (màu đỏ)
+            x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
+            line = ax.plot(x_route, y_route, color='red', linewidth=2, alpha=0.7)[0]
+            plotted_objects.append(line)
+            fig.canvas.draw()
 
 
 cid = fig.canvas.mpl_connect('button_press_event', on_click)
