@@ -1,6 +1,7 @@
 from shapely.geometry import LineString
 import copy
 
+user_deleted_edges = []
 deleted_edges = []
 added_edges = []
 
@@ -14,8 +15,7 @@ def find_nearest_edge(G, point):
     min_dist = float("inf")
     nearest = None
     for u, v, data in G.edges(data=True):
-        geom = data.get("geometry", LineString([(G.nodes[u]["x"], G.nodes[u]["y"]),
-                                                (G.nodes[v]["x"], G.nodes[v]["y"])]))
+        geom = data.get("geometry", LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (G.nodes[v]["x"], G.nodes[v]["y"])]))
         dist = geom.distance(point)
         if dist < min_dist:
             min_dist = dist
@@ -29,23 +29,26 @@ def reverse_edge_data(data):
     # Đảo ngược geometry nếu có
     if "geometry" in new_data:
         new_data["geometry"] = LineString(list(new_data["geometry"].coords)[::-1])
-
+    
     # Đảo ngược trường 'reversed' nếu có
     if "reversed" in new_data:
         if isinstance(new_data["reversed"], str):  # nếu là chuỗi "True"/"False"
             new_data["reversed"] = "False" if new_data["reversed"] == "True" else "True"
         elif isinstance(new_data["reversed"], bool):
             new_data["reversed"] = not new_data["reversed"]
-
+    
     return new_data
 
-def delete_edges(G, u, v, data):
+def delete_edges(G, u, v, data, mode = 1):
     print (u, v, data)
     if G.has_edge(u, v):
         for key in list(G[u][v].keys()):
             print(key)
             if data == G[u][v][key]:
-                deleted_edges.append((u, v, key, data.copy()))
+                if mode == 1: 
+                    deleted_edges.append((u, v, key, data.copy()))
+                else:
+                    user_deleted_edges.append((u, v, key, data.copy()))
                 G.remove_edge(u, v, key)
                 break
 
@@ -54,7 +57,10 @@ def delete_edges(G, u, v, data):
     if G.has_edge(v, u):
         for key in list(G[v][u].keys()):
             if new_data == G[v][u][key]:
-                deleted_edges.append((v, u, key, new_data))
+                if mode == 1:
+                    deleted_edges.append((v, u, key, new_data))
+                else:
+                    user_deleted_edges.append((v, u, key, new_data))
                 G.remove_edge(v, u, key)
                 break
 
@@ -69,22 +75,24 @@ def add_node_on_edge(G, u, v, data, geom, point):
     G.add_node(new_node_id, x=new_x, y=new_y)
 
     # Tạo hai cạnh mới
-    length1 = LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (new_x, new_y)]).length
-    length2 = LineString([(new_x, new_y), (G.nodes[v]["x"], G.nodes[v]["y"])]).length
-
+    line1 = LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (new_x, new_y)])
+    line2 = LineString([(new_x, new_y), (G.nodes[v]["x"], G.nodes[v]["y"])])
+    length1 = line1.length
+    length2 = line2.length
     attrs = {k: v for k, v in data.items() if k not in ("geometry", "length")}
     
-    G.add_edge(u, new_node_id, length=length1, geometry=LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (new_x, new_y)]), **attrs)
+    G.add_edge(u, new_node_id, length=length1, geometry=line1, **attrs)
     added_edges.append(save_last_added_edge(G, u, new_node_id))
-    G.add_edge(new_node_id, v, length=length2, geometry=LineString([(new_x, new_y), (G.nodes[v]["x"], G.nodes[v]["y"])]), **attrs)
+    G.add_edge(new_node_id, v, length=length2, geometry=line2, **attrs)
     added_edges.append(save_last_added_edge(G, new_node_id, v))
 
-
-    # Nếu đường không một chiều, thêm chiều ngược lại
+    # Nếu đường hai chiều, thêm chiều ngược lại
     if not data.get('oneway', False):
-        G.add_edge(new_node_id, u, length=length1, geometry=LineString([(new_x, new_y), (G.nodes[u]["x"], G.nodes[u]["y"])]), **attrs)
+        line3 = LineString([(new_x, new_y), (G.nodes[u]["x"], G.nodes[u]["y"])])
+        line4 = LineString([(G.nodes[v]["x"], G.nodes[v]["y"]), (new_x, new_y)])
+        G.add_edge(new_node_id, u, length=length1, geometry=line3, **attrs)
         added_edges.append(save_last_added_edge(G, new_node_id, u))
-        G.add_edge(v, new_node_id, length=length2, geometry=LineString([(G.nodes[v]["x"], G.nodes[v]["y"]), (new_x, new_y)]), **attrs)
+        G.add_edge(v, new_node_id, length=length2, geometry=line4, **attrs)
         added_edges.append(save_last_added_edge(G, v, new_node_id))
 
     delete_edges(G, u, v, data)
