@@ -44,6 +44,7 @@ def user_delete_last_edge(G, u, v): # Xóa cạnh cuối cùng u->v
     user_deleted_edges.append(edge1[0:2] + edge1[3:4])
 
 def delete_edges(G, u, v, data, mode = 1, switched = 0): # Xóa 1 cạnh (cả 2 chiều nếu có)
+    global user_deleted_edges
     if G.has_edge(u, v):
         for key in list(G[u][v].keys()):
             if data == G[u][v][key]:
@@ -51,7 +52,10 @@ def delete_edges(G, u, v, data, mode = 1, switched = 0): # Xóa 1 cạnh (cả 2
                     deleted_edges.append((u, v, key, data.copy()))
                     G.remove_edge(u, v, key)
                 else:
-                    user_deleted_edges.append((u, v, data.copy()))
+                    if not str((u, v, data.copy())) in map(str, user_deleted_edges):
+                       user_deleted_edges.append((u, v, data.copy()))
+                    else:
+                        user_deleted_edges = [item for item in user_deleted_edges if str(item) != str((u, v, data.copy()))]
                 break
 
     if switched == 0 and G.has_edge(v, u):

@@ -38,6 +38,7 @@ def main():
 
     clicked_points = []
     plotted_objects = []
+    plotted_user_deleted_edges = {}
     coords = []
     path = None
 
@@ -51,14 +52,28 @@ def main():
         if event.button == 3:  # Chuột phải: xóa cạnh gần nhất
             u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
 
+            if data['reversed'] == True or data['reversed'] == "True":
+                u, v = v, u
+                data = node_handling.reverse_edge_data(data)
+
             x_start, y_start = G.nodes[u]['x'], G.nodes[u]['y']
             x_end, y_end = G.nodes[v]['x'], G.nodes[v]['y']
 
-            line = ax.plot([x_start, x_end], [y_start, y_end], color='red', linewidth=2)[0]
-            # plotted_objects.append(line)  # Nếu muốn lưu để xoá sau này
-            fig.canvas.draw()
+            edge = str((u, v, data.copy()))
 
             node_handling.delete_edges(G, u, v, data, 2)
+
+            if not edge in plotted_user_deleted_edges:
+                line = ax.plot([x_start, x_end], [y_start, y_end], color='red', linewidth=2)[0]
+                plotted_user_deleted_edges[edge] = line
+                # plotted_objects.append(line)  # Nếu muốn lưu để xoá sau này          
+            else:
+                plotted_user_deleted_edges[edge].remove()
+                del plotted_user_deleted_edges[edge]
+            
+            fig.canvas.draw()  
+                
+
 
         elif event.button == 1:  # Chuột trái: thêm điểm bắt đầu/kết thúc
 
