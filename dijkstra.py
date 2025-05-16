@@ -1,3 +1,5 @@
+import node_handling
+
 # Thuật toán Dijkstra
 def heuristic(G, node_start, node_end):
     node_dist = {n: float('inf') for n in G.nodes} # khởi tạo, độ dài các start -> các nút = vô cùng
@@ -19,6 +21,9 @@ def heuristic(G, node_start, node_end):
         visited.add(current) # thêm current là đã thăm
 
         for _, neighbor, data in G.out_edges(current, data=True): # duyệt qua từng cạnh xuất phát từ current
+            if str((current, neighbor, data)) in map(str, node_handling.user_deleted_edges):
+                print("XXXXX")
+                continue
             if neighbor in visited: # thăm rồi thì thôi
                 continue
 

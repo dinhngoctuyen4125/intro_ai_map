@@ -1,4 +1,5 @@
 import math
+import node_handling
 
 # Khoảng cách euclid giữa 2 điểm
 def dist(G, node_A, node_B):
@@ -33,6 +34,10 @@ def heuristic(G, node_start, node_end):
 
         # Duyệt qua từng cạnh xuất phát từ current
         for _, neighbor, data in G.out_edges(current, data=True): # duyệt qua từng cạnh xuất phát từ current
+            print ((current, neighbor, data))
+            if str((current, neighbor, data)) in map(str, node_handling.user_deleted_edges):
+                print("XXXXX")
+                continue
             if neighbor in closed_list: # nếu đỉnh thăm rồi -> không thăm nữa
                 continue
 

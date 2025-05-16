@@ -73,6 +73,8 @@ def on_click(event):
             node_handling.deleted_edges.clear()
             for (u, v, key, data) in node_handling.added_edges:
                 if data == G[u][v][key]:
+                    if (u, v, data) in node_handling.user_deleted_edges:
+                        node_handling.user_deleted_edges.remove((u, v, data))
                     G.remove_edge(u, v, key)
             node_handling.added_edges.clear()
 
