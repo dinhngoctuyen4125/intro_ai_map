@@ -12,7 +12,6 @@ def save_last_added_edge(G, u, v): # Lấy cạnh cuối cùng từ u đến v
     data = G[u][v][key].copy()
     return (u, v, key, data)
 
-# Tìm điểm trên các đường đi mà gần điểm clicked vào nhất
 def find_nearest_edge(G, point): # Tìm cạnh gần điểm nhất
     min_dist = float("inf")
     nearest = None
@@ -82,7 +81,6 @@ def add_two_edges(G, u, v, new_node, data, switched = 0): # Thêm 2 cạnh u->ne
     if switched == 0 and not data.get('oneway', True):
         add_two_edges(G, v, u, new_node, reverse_edge_data(data), 1)
 
-# Nếu nearest không phải đầu mút 2 đoạn thẳng nào cả -> tạo node & edge mới
 def add_node_on_edge(G, u, v, data, geom, point): #Tìm điểm trên u->v gần nhất với point và tách u->v thành 2 cạnh (tách cả v->u nếu 2 chiều)
     # Tính vị trí gần nhất trên cạnh
     projected_point = geom.interpolate(geom.project(point))

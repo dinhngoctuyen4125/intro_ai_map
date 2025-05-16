@@ -50,7 +50,7 @@ def main():
         x, y = event.xdata, event.ydata
         click_point = Point(x, y)
 
-        if event.button == 3 and 'shift' in event.modifiers:
+        if event.button == 3 and 'shift' in event.modifiers: # Shift + Chuột phải: Đảo chiều đường một chiều
             u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
 
             if data["oneway"] == False or data["oneway"] == "False":
@@ -75,7 +75,6 @@ def main():
             if not edge in plotted_user_reversed_edges:
                 line = ax.plot([x_start, x_end], [y_start, y_end], color='yellow', linewidth=2)[0]
                 plotted_user_reversed_edges[edge] = line
-                # plotted_objects.append(line)  # Nếu muốn lưu để xoá sau này          
             else:
                 plotted_user_reversed_edges[edge].remove()
                 del plotted_user_reversed_edges[edge]
@@ -99,7 +98,6 @@ def main():
             if not edge in plotted_user_deleted_edges:
                 line = ax.plot([x_start, x_end], [y_start, y_end], color='red', linewidth=2)[0]
                 plotted_user_deleted_edges[edge] = line
-                # plotted_objects.append(line)  # Nếu muốn lưu để xoá sau này          
             else:
                 plotted_user_deleted_edges[edge].remove()
                 del plotted_user_deleted_edges[edge]
