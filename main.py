@@ -39,6 +39,7 @@ def main():
     clicked_points = []
     plotted_objects = []
     plotted_user_deleted_edges = {}
+    plotted_user_reversed_edges = {}
     coords = []
     path = None
 
@@ -49,7 +50,39 @@ def main():
         x, y = event.xdata, event.ydata
         click_point = Point(x, y)
 
-        if event.button == 3:  # Chuột phải: xóa cạnh gần nhất
+        if event.button == 3 and 'shift' in event.modifiers:
+            u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
+
+            if data["oneway"] == False or data["oneway"] == "False":
+                print("Đường đã chọn không phải đường một chiều")
+                print('--------------------------------------------')
+                return
+
+            x_start, y_start = G.nodes[u]['x'], G.nodes[u]['y']
+            x_end, y_end = G.nodes[v]['x'], G.nodes[v]['y']
+
+            for key in list(G[u][v].keys()):
+                if data == G[u][v][key]:
+                    G.remove_edge(u, v, key)
+                    break
+            G.add_edge(v, u, **node_handling.reverse_edge_data(data))
+
+            if (data["reversed"] == "False" or data["reversed"] == False):
+                edge = str((u, v, data.copy()))
+            else:
+                edge = str((v, u, node_handling.reverse_edge_data(data)))
+
+            if not edge in plotted_user_reversed_edges:
+                line = ax.plot([x_start, x_end], [y_start, y_end], color='yellow', linewidth=2)[0]
+                plotted_user_reversed_edges[edge] = line
+                # plotted_objects.append(line)  # Nếu muốn lưu để xoá sau này          
+            else:
+                plotted_user_reversed_edges[edge].remove()
+                del plotted_user_reversed_edges[edge]
+            
+            fig.canvas.draw()  
+
+        elif event.button == 3:  # Chuột phải: xóa cạnh gần nhất
             u, v, data, geom = node_handling.find_nearest_edge(G, click_point)
 
             if data['reversed'] == True or data['reversed'] == "True":

@@ -2,8 +2,10 @@ from shapely.geometry import LineString
 import copy
 
 user_deleted_edges = [] # Cạnh do người dùng xóa (cạnh đỏ)
+user_reversed_edges = [] # cạnh do người dùng đảo chiều (cạnh vàng)
 deleted_edges = [] # Cạnh bị xóa khi tách cạnh
 added_edges = [] # Cạnh sau khi tách được lưu lại
+
 
 def save_last_added_edge(G, u, v): # Lấy cạnh cuối cùng từ u đến v
     key = max(G[u][v].keys())
