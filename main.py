@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import contextily as ctx
 from shapely.geometry import Point
 
-import normal_click, reverse_clicked_edges, delete_clicked_edges
+import normal_click, reverse_clicked_edges, delete_clicked_edges, switch_oneway_twoway_clicked_edges
 
 # Giải thích module:
 # normal_click: Xử lý với lệnh click trái tìm đường
@@ -43,6 +43,10 @@ def main():
 
         if event.button == 3 and 'shift' in event.modifiers: # Shift + Chuột phải: Đảo chiều đường một chiều
             reverse_clicked_edges.process(G, fig, ax, click_point)
+            return
+        
+        if event.button == 3 and 'ctrl' in event.modifiers: #Ctrl + Chuột phải: Chuyển 1 chiều thành 2 chiều và ngược lại
+            switch_oneway_twoway_clicked_edges.process(G, fig, ax, click_point)
             return
 
         if event.button == 3:  # Chuột phải: xóa cạnh gần nhất
