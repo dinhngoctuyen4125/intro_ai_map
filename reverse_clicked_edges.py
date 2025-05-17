@@ -2,7 +2,6 @@ import node_handling
 
 plotted_reversed_edges = {}
 
-
 def process(G, fig, ax, point):
     u, v, data, geom = node_handling.find_nearest_edge(G, point)
 

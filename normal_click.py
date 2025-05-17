@@ -75,7 +75,7 @@ def find_and_draw_path(G, fig, ax, algo):
         print("Không có đường đi giữa hai điểm đã chọn.")
         print('--------------------------------------------')
         return
-
+    
     x_route, y_route = zip(*[(G.nodes[n]['x'], G.nodes[n]['y']) for n in path])
     line = ax.plot(x_route, y_route, color='blue', linewidth=2, alpha=0.7)[0]
     plotted_objects.append(line)

@@ -14,6 +14,12 @@ def switch_oneway_twoway_data(data): # Đảo ngược data cạnh
         new_data["oneway"] = not new_data["oneway"]
     return new_data
 
+def delete_edge_from_graph(G, u, v, data):
+    if not G.has_edge(u, v): return
+    for key in list(G[u][v].keys()):
+        if str(data) == str(G[u][v][key]):
+            G.remove_edge(u, v, key)
+            break
 
 def process(G, fig, ax, point):
     u, v, data, geom = node_handling.find_nearest_edge(G, point)
@@ -25,15 +31,11 @@ def process(G, fig, ax, point):
     x_end, y_end = G.nodes[v]['x'], G.nodes[v]['y']
 
     if data["reversed"] == "False" or data["reversed"] == False:
-        U, V, DATA, nDATA = u, v, data, ndata
+        U, V, DATA, nDATA = u, v, copy.deepcopy(data), copy.deepcopy(ndata)
     else:
-        U, V, DATA, nDATA = v, u, rdata, rndata
+        U, V, DATA, nDATA = v, u, copy.deepcopy(rdata), copy.deepcopy(rndata)
 
-    for key in list(G[u][v].keys()):
-        if data == G[u][v][key]:
-            G.remove_edge(u, v, key)
-            break
-
+    delete_edge_from_graph(G, u, v, data)
 
     if data["oneway"] == True or data["oneway"] == "True":
         G.add_edge(u, v, **ndata)
@@ -47,15 +49,12 @@ def process(G, fig, ax, point):
             del plotted_made_oneway_edges[str((U, V, DATA))]
         
     else:
-        for key in list(G[v][u].keys()):
-            if rdata == G[v][u][key]:
-                G.remove_edge(v, u, key)
-                break
+        delete_edge_from_graph(G, v, u, rdata)
 
         if not str((U, V, DATA)) in reverse_clicked_edges.plotted_reversed_edges:
-            G.add_edge(u, v, **nDATA)
+            G.add_edge(U, V, **nDATA)
         else:
-            G.add_edge(v, u, **node_handling.reverse_edge_data(nDATA))
+            G.add_edge(V, U, **node_handling.reverse_edge_data(nDATA))
         
         if not str((U, V, DATA)) in plotted_made_twoway_edges:
             line = ax.plot([x_start, x_end], [y_start, y_end], color='green', linewidth=2)[0]

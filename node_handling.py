@@ -38,16 +38,18 @@ def reverse_edge_data(data): # Đảo ngược data cạnh
     
     return new_data
 
-def delete_edges(G, u, v, data, switched = 0): # Xóa 1 cạnh (cả 2 chiều nếu có)
-    if G.has_edge(u, v):
-        for key in list(G[u][v].keys()):
-            if data == G[u][v][key]:
-                deleted_edges.append((u, v, key, data.copy()))
-                G.remove_edge(u, v, key)
-                break
+def delete_edge_from_graph(G, u, v, data):
+    if not G.has_edge(u, v): return
+    for key in list(G[u][v].keys()):
+        if str(data) == str(G[u][v][key]):
+            deleted_edges.append((u, v, key, data.copy()))
+            G.remove_edge(u, v, key)
+            break
 
-    if switched == 0 and G.has_edge(v, u):
-        delete_edges(G, v, u, reverse_edge_data(data), 1)
+def delete_edges_both_directions(G, u, v, data): # Xóa 1 cạnh (cả 2 chiều nếu có)
+    delete_edge_from_graph(G, u, v, data)
+    if data["oneway"] == False or data["oneway"] == "False":
+        delete_edge_from_graph(G, v, u, reverse_edge_data(data))
 
 def add_edge(G, u, v, data): # Thêm 1 cạnh 1 chiều từ u đến v
     line = LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (G.nodes[v]["x"], G.nodes[v]["y"])])
@@ -65,7 +67,7 @@ def add_two_edges(G, u, v, new_node, data, switched = 0): # Thêm 2 cạnh u->ne
         delete_clicked_edges.delete_last_edge(G, new_node, v)
     
     # Nếu đường hai chiều, thêm chiều ngược lại
-    if switched == 0 and not data.get('oneway', True):
+    if switched == 0 and not (data.get('oneway', True) or data.get('oneway', "True")):
         add_two_edges(G, v, u, new_node, reverse_edge_data(data), 1)
 
 def add_node_on_edge(G, u, v, data, geom, point): #Tìm điểm trên u->v gần nhất với point và tách u->v thành 2 cạnh (tách cả v->u nếu 2 chiều)
@@ -79,5 +81,6 @@ def add_node_on_edge(G, u, v, data, geom, point): #Tìm điểm trên u->v gần
 
     add_two_edges(G, u, v, new_node_id, data)
 
-    delete_edges(G, u, v, data)
+    delete_edges_both_directions(G, u, v, data)
+
     return new_node_id
