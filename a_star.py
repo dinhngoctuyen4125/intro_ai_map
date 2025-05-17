@@ -1,6 +1,7 @@
 import math
 import heapq
 import delete_clicked_edges
+import distance
 
 def reconstruct_path(prev, start, end):
     path = []
@@ -11,14 +12,9 @@ def reconstruct_path(prev, start, end):
     path.reverse()
     return path
 
-def dist(G, node_A, node_B):
-    x1, y1 = G.nodes[node_A]['x'], G.nodes[node_A]['y']
-    x2, y2 = G.nodes[node_B]['x'], G.nodes[node_B]['y']
-    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
-
 def heuristic(G, start, end):
     open_heap = []
-    heapq.heappush(open_heap, (dist(G, start, end), start))
+    heapq.heappush(open_heap, (distance.distance_on_earth(G, start, end), start))
 
     closed_set = set()
     g_score = {n: float('inf') for n in G.nodes}
@@ -47,7 +43,7 @@ def heuristic(G, start, end):
             if tentative_g < g_score.get(neighbor, float('inf')):
                 prev[neighbor] = current_node
                 g_score[neighbor] = tentative_g
-                f_score = tentative_g + dist(G, neighbor, end)
+                f_score = tentative_g + distance.distance_on_earth(G, neighbor, end)
                 heapq.heappush(open_heap, (f_score, neighbor))
 
     return None

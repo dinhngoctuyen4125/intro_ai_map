@@ -1,4 +1,4 @@
-import node_handling, delete_clicked_edges, path_handling, a_star, dijkstra
+import node_handling, delete_clicked_edges, distance, a_star, dijkstra
 
 clicked_points = []
 plotted_objects = []
@@ -67,7 +67,7 @@ def find_and_draw_path(G, fig, ax, algo):
         else:
             path = dijkstra.heuristic(G, node_start, node_end)
 
-        length = path_handling.do_dai_duong_di(G, path)
+        length = distance.do_dai_duong_di(G, path)
         print(f'Độ dài đường: {length:.2f} km')
         print('--------------------------------------------')
 
