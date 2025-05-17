@@ -1,13 +1,11 @@
 from shapely.geometry import LineString
 import copy
+import delete_clicked_edges
 
-user_deleted_edges = [] # Cạnh do người dùng xóa (cạnh đỏ)
-user_reversed_edges = [] # cạnh do người dùng đảo chiều (cạnh vàng)
 deleted_edges = [] # Cạnh bị xóa khi tách cạnh
 added_edges = [] # Cạnh sau khi tách được lưu lại
 
-
-def save_last_added_edge(G, u, v): # Lấy cạnh cuối cùng từ u đến v
+def last_edge(G, u, v): # Lấy cạnh cuối cùng từ u đến v
     key = max(G[u][v].keys())
     data = G[u][v][key].copy()
     return (u, v, key, data)
@@ -40,42 +38,31 @@ def reverse_edge_data(data): # Đảo ngược data cạnh
     
     return new_data
 
-def user_delete_last_edge(G, u, v): # Xóa cạnh cuối cùng u->v
-    edge1 = save_last_added_edge(G, u, v)
-    user_deleted_edges.append(edge1[0:2] + edge1[3:4])
-
-def delete_edges(G, u, v, data, mode = 1, switched = 0): # Xóa 1 cạnh (cả 2 chiều nếu có)
-    global user_deleted_edges
+def delete_edges(G, u, v, data, switched = 0): # Xóa 1 cạnh (cả 2 chiều nếu có)
     if G.has_edge(u, v):
         for key in list(G[u][v].keys()):
             if data == G[u][v][key]:
-                if mode == 1: 
-                    deleted_edges.append((u, v, key, data.copy()))
-                    G.remove_edge(u, v, key)
-                else:
-                    if not str((u, v, data.copy())) in map(str, user_deleted_edges):
-                       user_deleted_edges.append((u, v, data.copy()))
-                    else:
-                        user_deleted_edges = [item for item in user_deleted_edges if str(item) != str((u, v, data.copy()))]
+                deleted_edges.append((u, v, key, data.copy()))
+                G.remove_edge(u, v, key)
                 break
 
     if switched == 0 and G.has_edge(v, u):
-        delete_edges(G, v, u, reverse_edge_data(data), mode, 1)
+        delete_edges(G, v, u, reverse_edge_data(data), 1)
 
 def add_edge(G, u, v, data): # Thêm 1 cạnh 1 chiều từ u đến v
     line = LineString([(G.nodes[u]["x"], G.nodes[u]["y"]), (G.nodes[v]["x"], G.nodes[v]["y"])])
     length = line.length * 100000
     attrs = {k: v for k, v in data.items() if k not in ("geometry", "length")}
     G.add_edge(u, v, length=length, geometry=line, **attrs)
-    added_edges.append(save_last_added_edge(G, u, v))
+    added_edges.append(last_edge(G, u, v))
 
 def add_two_edges(G, u, v, new_node, data, switched = 0): # Thêm 2 cạnh u->new, new->v và cả new->u, v->new nếu u->v hai chiều
     add_edge(G, u, new_node, data)
     add_edge(G, new_node, v, data)
 
-    if (u, v, data) in user_deleted_edges:
-        user_delete_last_edge(G, u, new_node)
-        user_delete_last_edge(G, new_node, v)
+    if (u, v, data) in delete_clicked_edges.deleted_edges:
+        delete_clicked_edges.delete_last_edge(G, u, new_node)
+        delete_clicked_edges.delete_last_edge(G, new_node, v)
     
     # Nếu đường hai chiều, thêm chiều ngược lại
     if switched == 0 and not data.get('oneway', True):

@@ -1,11 +1,11 @@
-import node_handling, path_handling, a_star, dijkstra
+import node_handling, delete_clicked_edges, path_handling, a_star, dijkstra
 
 clicked_points = []
 plotted_objects = []
 coords = []
 path = None
 
-def normal_click(G, fig, ax, point, algo):
+def process(G, fig, ax, point, algo):
     if len(clicked_points) >= 2:
         # Reset khi click lần thứ 3
         restore_graph(G)
@@ -41,8 +41,7 @@ def restore_graph(G):
 
     for u, v, key, data in node_handling.added_edges:
         if data == G[u][v][key]:
-            if (u, v, data) in node_handling.user_deleted_edges:
-                node_handling.user_deleted_edges.remove((u, v, data))
+            delete_clicked_edges.deleted_edges = [item for item in delete_clicked_edges.deleted_edges if str(item) != str((u, v, data.copy()))]
             G.remove_edge(u, v, key)
     node_handling.added_edges.clear()
 

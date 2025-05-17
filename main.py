@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import contextily as ctx
 from shapely.geometry import Point
 
-import normal_click, reverse_edges, delete_edges
+import normal_click, reverse_clicked_edges, delete_clicked_edges
 
 # Giải thích module:
 # normal_click: Xử lý với lệnh click trái tìm đường
@@ -42,15 +42,15 @@ def main():
         click_point = Point(x, y)
 
         if event.button == 3 and 'shift' in event.modifiers: # Shift + Chuột phải: Đảo chiều đường một chiều
-            reverse_edges.reverse_edge(G, fig, ax, click_point)
+            reverse_clicked_edges.process(G, fig, ax, click_point)
             return
 
         if event.button == 3:  # Chuột phải: xóa cạnh gần nhất
-            delete_edges.delete_edge(G, fig, ax, click_point)
+            delete_clicked_edges.process(G, fig, ax, click_point)
             return
 
         if event.button == 1:  # Chuột trái: thêm điểm bắt đầu/kết thúc
-            normal_click.normal_click(G, fig, ax, click_point, algo)
+            normal_click.process(G, fig, ax, click_point, algo)
             return 
 
     fig.canvas.mpl_connect('button_press_event', on_click)

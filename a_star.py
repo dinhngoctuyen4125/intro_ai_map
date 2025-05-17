@@ -1,6 +1,6 @@
 import math
 import heapq
-import node_handling
+import delete_clicked_edges
 
 def reconstruct_path(prev, start, end):
     path = []
@@ -36,7 +36,7 @@ def heuristic(G, start, end):
             return reconstruct_path(prev, start, end)
 
         for _, neighbor, data in G.out_edges(current_node, data=True):
-            if str((current_node, neighbor, data)) in map(str, node_handling.user_deleted_edges):
+            if str((current_node, neighbor, data)) in map(str, delete_clicked_edges.deleted_edges):
                 continue
             if neighbor in closed_set:
                 continue
