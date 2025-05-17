@@ -1,10 +1,9 @@
 import node_handling, reverse_clicked_edges
 import copy
 
-plotted_made_oneway_edges = {}
-plotted_made_twoway_edges = {}
+plotted_edges = [{}, {}] #0: oneway, 1: twoway
 
-def switch_oneway_twoway_data(data): # Đảo ngược data cạnh
+def switch_oneway_twoway_data(data): # Đảo giá trị oneway của data
     # Tạo bản sao sâu để tránh thay đổi gốc
     new_data = copy.deepcopy(data)
 
@@ -37,30 +36,23 @@ def process(G, fig, ax, point):
 
     delete_edge_from_graph(G, u, v, data)
 
-    if data["oneway"] == True or data["oneway"] == "True":
-        G.add_edge(u, v, **ndata)
-        G.add_edge(v, u, **rndata)
-
-        if not str((U, V, DATA)) in plotted_made_oneway_edges:
-            line = ax.plot([x_start, x_end], [y_start, y_end], color='purple', linewidth=2)[0]
-            plotted_made_twoway_edges[str((U, V, nDATA))] = line
-        else:
-            plotted_made_oneway_edges[str((U, V, DATA))].remove()
-            del plotted_made_oneway_edges[str((U, V, DATA))]
-        
-    else:
+    if data["oneway"] == False or data["oneway"] == "False":
+        mode = 0
         delete_edge_from_graph(G, v, u, rdata)
-
         if not str((U, V, DATA)) in reverse_clicked_edges.plotted_reversed_edges:
             G.add_edge(U, V, **nDATA)
         else:
             G.add_edge(V, U, **node_handling.reverse_edge_data(nDATA))
-        
-        if not str((U, V, DATA)) in plotted_made_twoway_edges:
-            line = ax.plot([x_start, x_end], [y_start, y_end], color='green', linewidth=2)[0]
-            plotted_made_oneway_edges[str((U, V, nDATA))] = line
-        else:
-            plotted_made_twoway_edges[str((U, V, DATA))].remove()
-            del plotted_made_twoway_edges[str((U, V, DATA))]
+    else:
+        mode = 1
+        G.add_edge(u, v, **ndata)
+        G.add_edge(v, u, **rndata)
+
+    if not str((U, V, DATA)) in plotted_edges[1 - mode]:
+        line = ax.plot([x_start, x_end], [y_start, y_end], color='green' if mode == 0 else 'purple', linewidth=2)[0]
+        plotted_edges[mode][str((U, V, nDATA))] = line
+    else:
+        plotted_edges[1 - mode][str((U, V, DATA))].remove()
+        del plotted_edges[1 - mode][str((U, V, DATA))]
     
     fig.canvas.draw()  

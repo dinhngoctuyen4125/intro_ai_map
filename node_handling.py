@@ -21,7 +21,7 @@ def find_nearest_edge(G, point): # Tìm cạnh gần điểm nhất
             nearest = (u, v, data, geom)
     return nearest
 
-def reverse_edge_data(data): # Đảo ngược data cạnh
+def reverse_edge_data(data): # Đảo ngược reversed, geometry của data
     # Tạo bản sao sâu để tránh thay đổi gốc
     new_data = copy.deepcopy(data)
 
