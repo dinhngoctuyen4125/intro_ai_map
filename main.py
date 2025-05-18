@@ -23,10 +23,10 @@ def main():
 
     # Tải dữ liệu bản đồ
     try:
-        G = ox.load_graphml("lang_thuong.graphml")
+        G = ox.load_graphml("./assets/lang_thuong.graphml")
     except FileNotFoundError:
         G = ox.graph_from_place(place_name, network_type="all")
-        ox.save_graphml(G, filepath="lang_thuong.graphml")
+        ox.save_graphml(G, filepath="./assets/lang_thuong.graphml")
 
     gdf_edges = ox.graph_to_gdfs(G, nodes=False)
 
